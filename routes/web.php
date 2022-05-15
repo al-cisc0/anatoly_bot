@@ -13,6 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/are-you-ok', function () {
+    return "I'm ok, I'm ok I'm ok, I'm not alcoholic!";
 });
