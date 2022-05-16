@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\CrawlerExtracts\BooksExtract;
 use App\CrawlerExtracts\GaricExtract;
 use App\CrawlerExtracts\PickupMasterExtract;
 use App\Http\Controllers\Controller;
@@ -56,18 +57,14 @@ class WebhookController extends Controller
 
     protected function parseMessage()
     {
-        $text = $this->message['text'] ?? '';
+        $text = strtolower($this->message['text'] ?? '');
         if (
-            str_contains(
-                $text,
-                'Анатолий'
-            ) ||
             str_contains(
                 $text,
                 'анатолий'
             )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка, попрошайка. А еще я приветствую всех ботов когда они присоединяются к чату.',
+                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга. А еще я приветствую всех ботов когда они присоединяются к чату.',
                                        $this->message
                                    ));
         }
@@ -117,6 +114,15 @@ class WebhookController extends Controller
         }
         if ( str_contains(
             $text,
+            'книг'
+        )) {
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                       BooksExtract::getExtract(),
+                                       $this->message
+                                   ));
+        }
+        if ( str_contains(
+            $text,
             'попрошайка'
         )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
@@ -142,7 +148,10 @@ class WebhookController extends Controller
             'заправки'
         )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                        $this->getDressings(0),
+                                        $this->getDressings(
+                                            $text,
+                                            false
+                                        ),
                                        $this->message
                                    ));
         }
@@ -151,7 +160,9 @@ class WebhookController extends Controller
             'заправка'
         )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       $this->getDressings(),
+                                       $this->getDressings(
+                                           $text
+                                       ),
                                        $this->message
                                    ));
         }
@@ -164,9 +175,11 @@ class WebhookController extends Controller
     }
 
     protected function getDressings(
-        $random = 1
+        string $text,
+        ?bool $single = true,
     )
     {
+
         $dressings = [
             '1. Лучше бы ты не вёл себя как самовлюблённый осёл и святоша, когда проповедуешь Мою макаронную благодать. Если другие люди не верят в Меня, в этом нет ничего страшного. Я не настолько самовлюблён, честно. Кроме того, речь идёт не об этих людях, так что не будем отвлекаться.',
             '2. Лучше бы ты не оправдывал Моим именем угнетение, порабощение, шинкование или экономическую эксплуатацию других, ну и сам понимаешь, вообще мерзкое отношение к окружающим. Я не требую жертв, чистота обязательна для питьевой воды, а не для людей.',
@@ -177,8 +190,13 @@ class WebhookController extends Controller
             '7. Лучше бы ты не рассказывал всем окружающим, как Я говорил с тобой. Ты не настолько всем интересен. Хватит думать только о себе. И помни, что Я попросил тебя любить своего ближнего, неужели не дошло?',
             '8. Лучше бы ты не поступал с другими так, как хочешь, чтобы поступили с тобой, если речь заходит об огромном количестве латекса или вазелина. Но если другому человеку это тоже нравится, то (следуя четвёртой заповеди) делай это, снимай на фото, только ради всего святого — надевай презерватив! Ведь это всего лишь кусок резины. Если бы Я не хотел, чтобы ты получал удовольствие от самого процесса, Я бы предусмотрел шипы или ещё что-нибудь в этом роде.',
         ];
-
-        if ($random) {
+        if ($single) {
+            $matches = [];
+            if (preg_match('/[\d]+/',$text,$matches)) {
+                if (!empty($dressings[$matches[0]-1])) {
+                    return $dressings[$matches[0]-1];
+                }
+            }
             return $dressings[array_rand($dressings)];
         }
 
@@ -191,7 +209,6 @@ class WebhookController extends Controller
      */
     protected function setUser()
     {
-        Log::info(print_r($this->message,1));
         if (!empty($this->message['chat']['id'])) {
             $this->chat = Chat::firstOrCreate(
                 [
