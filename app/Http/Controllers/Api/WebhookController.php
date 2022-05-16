@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\CrawlerExtracts\BooksExtract;
+use App\CrawlerExtracts\ChapayExtract;
 use App\CrawlerExtracts\GaricExtract;
 use App\CrawlerExtracts\PickupMasterExtract;
 use App\Http\Controllers\Controller;
@@ -64,7 +65,7 @@ class WebhookController extends Controller
                 'анатолий'
             )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга. А еще я приветствую всех кто присоединяется к чату.',
+                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга, анекдот. А еще я приветствую всех кто присоединяется к чату.',
                                        $this->message
                                    ));
         }
@@ -100,6 +101,15 @@ class WebhookController extends Controller
         )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
                                        GaricExtract::getExtract(),
+                                       $this->message
+                                   ));
+        }
+        if ( str_contains(
+            $text,
+            'анекдот'
+        )) {
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                       ChapayExtract::getExtract(),
                                        $this->message
                                    ));
         }
