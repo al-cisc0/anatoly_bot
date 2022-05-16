@@ -172,17 +172,21 @@ class WebhookController extends Controller
                 $this->message
                                    ));
         }
-//        if (empty($this->message['new_chat_participant']['is_bot']) || $this->message['new_chat_participant']['is_bot'] == 0) {
-//            $text = '';
-//            if ($this->chat?->rules) {
-//                $text = 'Правила чата: '.PHP_EOL.PHP_EOL.$this->chat->rules;
-//            }
-//            $this->sendBotResponse(new SimpleBotMessageNotification(
-//                'Бобра пожмакивать! Я хотел сказать добро пожаловать! Не сильно тут шали ;-)'.PHP_EOL.PHP_EOL.$text,
-//                $this->message
-//                                   ));
-//
-//        }
+        if (!empty($this->message['new_chat_participant']) &&
+            (
+                empty($this->message['new_chat_participant']['is_bot']) ||
+                $this->message['new_chat_participant']['is_bot'] == 0)
+        ) {
+            $text = '';
+            if ($this->chat?->rules) {
+                $text = 'Правила чата: '.PHP_EOL.PHP_EOL.$this->chat->rules;
+            }
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                'Бобра пожмакивать! Я хотел сказать добро пожаловать! Не сильно тут шали ;-)'.PHP_EOL.PHP_EOL.$text,
+                $this->message
+                                   ));
+
+        }
     }
 
     protected function getDressings(
