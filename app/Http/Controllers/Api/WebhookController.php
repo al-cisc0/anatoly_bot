@@ -64,7 +64,7 @@ class WebhookController extends Controller
                 'анатолий'
             )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга. А еще я приветствую всех ботов когда они присоединяются к чату.',
+                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга. А еще я приветствую всех кто присоединяется к чату.',
                                        $this->message
                                    ));
         }
@@ -171,6 +171,17 @@ class WebhookController extends Controller
                 'Эй ты, ублюдок электрический, ну-ка укажи все светофоры!',
                 $this->message
                                    ));
+        }
+        if (!empty($this->message['new_chat_participant']['is_bot']) && $this->message['new_chat_participant']['is_bot'] == 0) {
+            $text = '';
+            if ($this->chat?->rules) {
+                $text = 'Правила чата: '.PHP_EOL.PHP_EOL.$this->chat->rules;
+            }
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                'Бобра пожмакивать! Я хотел сказать добро пожаловать! Не сильно тут шали ;-)'.PHP_EOL.PHP_EOL.$text,
+                $this->message
+                                   ));
+
         }
     }
 
