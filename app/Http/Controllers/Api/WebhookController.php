@@ -172,7 +172,7 @@ class WebhookController extends Controller
                 $this->message
                                    ));
         }
-        if (!empty($this->message['new_chat_participant']['is_bot']) && $this->message['new_chat_participant']['is_bot'] == 0) {
+        if (empty($this->message['new_chat_participant']['is_bot']) || $this->message['new_chat_participant']['is_bot'] == 0) {
             $text = '';
             if ($this->chat?->rules) {
                 $text = 'Правила чата: '.PHP_EOL.PHP_EOL.$this->chat->rules;
