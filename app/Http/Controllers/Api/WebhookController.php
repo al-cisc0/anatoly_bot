@@ -57,7 +57,7 @@ class WebhookController extends Controller
 
     protected function parseMessage()
     {
-        $text = strtolower($this->message['text'] ?? '');
+        $text = mb_strtolower($this->message['text'] ?? '');
         if (
             str_contains(
                 $text,
