@@ -65,7 +65,7 @@ class WebhookController extends Controller
                 'анатолий'
             )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга, анекдот. А еще я приветствую всех кто присоединяется к чату.',
+                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга, анекдот, линейка. А еще я приветствую всех кто присоединяется к чату.',
                                        $this->message
                                    ));
         }
@@ -111,6 +111,15 @@ class WebhookController extends Controller
         )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
                                        GaricExtract::getExtract(),
+                                       $this->message
+                                   ));
+        }
+        if ( str_contains(
+            $text,
+            'линейк'
+        )) {
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                       $this->getSize(),
                                        $this->message
                                    ));
         }
@@ -207,6 +216,41 @@ class WebhookController extends Controller
                                    ));
 
         }
+    }
+
+    protected function getSize()
+    {
+        $size = rand(1,40);
+        $pinus = '8';
+        for ($i = 1;$i<=$size;$i++) {
+            $pinus .= '=';
+        }
+        $pinus .= 'Э';
+        if ($size < 3) {
+            $ranking = 'Гномик';
+        }
+        if ($size >= 3) {
+            $ranking = 'Шалун';
+        }
+        if ($size >= 6) {
+            $ranking = 'Затейник';
+        }
+        if ($size >= 10) {
+            $ranking = 'Самурай';
+        }
+        if ($size >= 14) {
+            $ranking = 'Рядовой';
+        }
+        if ($size >= 20) {
+            $ranking = 'Лысый из бразерс';
+        }
+        if ($size >= 25) {
+            $ranking = 'Мутант';
+        }
+        if ($size >= 30) {
+            $ranking = 'Фантаст';
+        }
+        return 'У тебя '.$size.' см. Твой ранг - '.$ranking.PHP_EOL.PHP_EOL.$pinus;
     }
 
     protected function getDressings(
