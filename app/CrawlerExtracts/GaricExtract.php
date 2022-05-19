@@ -16,7 +16,11 @@ class GaricExtract
             $crawler = new Crawler();
             $crawler->addHtmlContent($response);
             $count = $crawler->filter('div.fb2-stanza')->count();
-            $text = $crawler->filter('div.fb2-stanza')->getNode(rand(0,$count))->textContent;
+            $childNodes = $crawler->filter('div.fb2-stanza')->getNode(rand(0,$count))->childNodes;
+            $text = '';
+            foreach ($childNodes as $node) {
+                $text .= $node->textContent.PHP_EOL;
+            }
             return $text.PHP_EOL.PHP_EOL.' И. Губерман';
         } catch (\Exception $e) {
             return 'Ой-ой что-то где-то пошло как-то не так...';
