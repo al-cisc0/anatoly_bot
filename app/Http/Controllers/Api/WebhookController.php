@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\CrawlerExtracts\BearExtract;
 use App\CrawlerExtracts\BooksExtract;
 use App\CrawlerExtracts\ChapayExtract;
 use App\CrawlerExtracts\GaricExtract;
@@ -11,6 +12,7 @@ use App\Models\Beer;
 use App\Models\Chat;
 use App\Models\User;
 use App\Notifications\SimpleBotMessageNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +47,7 @@ class WebhookController extends Controller
      */
     public function setBotInput(Request $request, string $token)
     {
+//        Log::info(print_r($request->all(),1));
         if ($token != config('services.telegram-bot-api.token')) {
             return abort(403);
         }
@@ -56,8 +59,112 @@ class WebhookController extends Controller
         return response()->json([]);
     }
 
+    protected function parseBotPattern(): bool
+    {
+        $text = mb_strtolower($this->message['text'] ?? '');
+        if (
+            str_contains(
+                $text,
+                'мальчики'
+            ) ||
+            str_contains(
+                $text,
+                'парни'
+            ) ||
+            str_contains(
+                $text,
+                'пообща'
+            ) ||
+            str_contains(
+                $text,
+                'поболта'
+            ) ||
+            str_contains(
+                $text,
+                'познаком'
+            )
+        ) {
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                        BearExtract::getExtract(),
+                                       $this->message
+                                   ));
+            return true;
+        }
+        return false;
+    }
+
+    protected function parseRating():bool
+    {
+        if (
+            !empty($this->message['reply_to_message']) &&
+            !empty($this->message['text']) &&
+            ($this->message['text'] == '+' || $this->message['text'] == '-')
+        ) {
+            $request = $this->message['text'];
+            $selfRating = $this->user->chats()->where('id',$this->chat->id)->first()?->pivot->rating;
+            if ($selfRating < 0) {
+                $this->sendBotResponse(new SimpleBotMessageNotification(
+                                           'Ой кто бы тут выпендривался! У самого то рейтинг '.$selfRating,
+                                       $this->message
+                                       ));
+                return true;
+            }
+            $userTgId = $this->message['reply_to_message']['from']['id'];
+            if ($user = User::OfTelegramId($userTgId)->first()) {
+                if ($user->id == $this->user->id) {
+                    if ($request == '+') {
+                        $this->sendBotResponse(new SimpleBotMessageNotification(
+                                                   'Эй ты, извращенец! Аутофелляция в общественных местах - это весело, но недопустимо!',
+                                                   $this->message
+                                               ));
+                        return true;
+                    } else {
+                        $this->sendBotResponse(new SimpleBotMessageNotification(
+                                                   'Ну-ну, дружок, не кори себя. Все будет хорошо.',
+                                                   $this->message
+                                               ));
+                        return true;
+                    }
+                }
+                $currentChat = $user->chats()->where('id',$this->chat->id)->first();
+                if ($currentChat) {
+                    if ($request == '+') {
+                        $newval = $currentChat->pivot->rating + 1;
+                    } else {
+                        $newval = $currentChat->pivot->rating - 1;
+                    }
+                    $currentChat->pivot->rating =  $newval;
+                    $currentChat->pivot->save();
+                } else {
+                    $newval = $request == '+' ? 1 : -1;
+                    $user->chats()->attach(
+                        [
+                            $this->chat->id => [
+                                'rating' => -1
+                            ]
+                        ]
+                    );
+                }
+                $this->sendBotResponse(new SimpleBotMessageNotification(
+                                           'Понял-принял! Его рейтинг теперь '.$newval,
+                                           $this->message
+                                       ));
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected function parseMessage()
     {
+        if (Carbon::parse($this->user->created_at)->diffInMinutes(now()) < 5) {
+            if ($this->parseBotPattern()) {
+                return;
+            }
+        }
+        if($this->parseRating()) {
+            return;
+        }
         $text = mb_strtolower($this->message['text'] ?? '');
         if (
             str_contains(
@@ -65,7 +172,7 @@ class WebhookController extends Controller
                 'анатолий'
             )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга, анекдот, линейка. А еще я приветствую всех кто присоединяется к чату.',
+                                       'Я читаю все ваши сообщения и реагирую на слова: Анатолий, пиво, поболтаем, гарик, мачо, правила, заправки, заправка (можно с номером), попрошайка, книга, анекдот, линейка, мой рейтинг, чтобы повилять на рейтинг другого участника чата отправь + или - в ответ на его сообщение. А еще я приветствую всех кто присоединяется к чату.',
                                        $this->message
                                    ));
         }
@@ -76,6 +183,16 @@ class WebhookController extends Controller
         ) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
                 'Могу поболтать своей электронной ялдой',
+                $this->message
+                                   ));
+        }
+        if (str_contains(
+            $text,
+            'мой рейтинг'
+        )
+        ) {
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                'Твой рейтинг '.$this->user->chats()->where('id',$this->chat->id)->first()?->pivot->rating,
                 $this->message
                                    ));
         }
@@ -325,6 +442,9 @@ class WebhookController extends Controller
                                                'is_admin'    => $isOwner,
                                                'password'    => Hash::make(Str::random(8))
                                            ]);
+            }
+            if (!$this->user->chats()->where('id',$this->chat->id)->exists()) {
+                $this->user->chats()->attach($this->chat->id);
             }
         }
     }

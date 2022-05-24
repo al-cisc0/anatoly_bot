@@ -16,7 +16,7 @@ class ChapayExtract
             $crawler = new Crawler();
             $crawler->addHtmlContent($response);
             $count = $crawler->filter('div.topicbox div.text')->count();
-            $text = $crawler->filter('div.topicbox div.text')->getNode(rand(0,$count))->textContent;
+            $text = $crawler->filter('div.topicbox div.text')->getNode(rand(0,$count-1))->textContent;
             return $text;
         } catch (\Exception $e) {
             return 'Ой-ой что-то где-то пошло как-то не так...';

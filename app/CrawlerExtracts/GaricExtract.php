@@ -16,7 +16,7 @@ class GaricExtract
             $crawler = new Crawler();
             $crawler->addHtmlContent($response);
             $count = $crawler->filter('div.fb2-stanza')->count();
-            $childNodes = $crawler->filter('div.fb2-stanza')->getNode(rand(0,$count))->childNodes;
+            $childNodes = $crawler->filter('div.fb2-stanza')->getNode(rand(0,$count-1))->childNodes;
             $text = '';
             foreach ($childNodes as $node) {
                 $text .= $node->textContent.PHP_EOL;
