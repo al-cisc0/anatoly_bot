@@ -174,7 +174,7 @@ class WebhookController extends Controller
             )) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
                                        'Кто взывал ко мне?'.PHP_EOL.
-                                       'Я читаю все ваши сообщения и реагирую на кличевые слова:'.PHP_EOL.
+                                       'Я читаю все ваши сообщения и реагирую на ключевые слова:'.PHP_EOL.
                                        PHP_EOL.'Анатолий'.PHP_EOL.
                                        'попрошайка'.PHP_EOL.PHP_EOL.
                                        'пиво'.PHP_EOL.
