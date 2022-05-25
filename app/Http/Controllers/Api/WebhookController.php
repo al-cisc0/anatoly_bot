@@ -65,11 +65,15 @@ class WebhookController extends Controller
         if (
             str_contains(
                 $text,
-                'мальчики'
+                'мальчик'
             ) ||
             str_contains(
                 $text,
-                'парни'
+                'мальчишк'
+            ) ||
+            str_contains(
+                $text,
+                'парн'
             ) ||
             str_contains(
                 $text,
