@@ -86,6 +86,10 @@ class WebhookController extends Controller
             str_contains(
                 $text,
                 'познаком'
+            ) ||
+            str_contains(
+                $text,
+                'поговори'
             )
         ) {
             $this->sendBotResponse(new SimpleBotMessageNotification(
