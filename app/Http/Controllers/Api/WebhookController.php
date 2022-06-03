@@ -89,6 +89,10 @@ class WebhookController extends Controller
             ) ||
             str_contains(
                 $text,
+                'знакомлюсь'
+            ) ||
+            str_contains(
+                $text,
                 'поговори'
             )
         ) {
