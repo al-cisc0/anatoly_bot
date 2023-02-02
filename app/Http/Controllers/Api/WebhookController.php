@@ -228,7 +228,7 @@ class WebhookController extends Controller
                                        'попрошайка'.PHP_EOL.PHP_EOL.
                                        'пиво'.PHP_EOL.
                                        'поболтаем'.PHP_EOL.
-                                       'гарик'.PHP_EOL.
+                                       'гарик (временно нет)'.PHP_EOL.
                                        'мачо'.PHP_EOL.
                                        'правила'.PHP_EOL.
                                        'заправки, заправка (можно с номером)'.PHP_EOL.
@@ -291,10 +291,10 @@ class WebhookController extends Controller
             $text,
             'гарик'
         )) {
-            $this->sendBotResponse(new SimpleBotMessageNotification(
-                                       GaricExtract::getExtract(),
-                                       $this->message
-                                   ));
+//            $this->sendBotResponse(new SimpleBotMessageNotification(
+//                                       GaricExtract::getExtract(),
+//                                       $this->message
+//                                   ));
         }
         if ( str_contains(
             $text,
