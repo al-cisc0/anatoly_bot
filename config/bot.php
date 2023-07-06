@@ -11,4 +11,5 @@ return [
      */
     'free_access' => env('TELEGRAM_BOT_FREE_ACCESS',1),
     'donation_address' => env('AUTHOR_DONATION_ADDRESS',''),
+    'openapi_token' => env('OPENAPI_TOKEN',''),
 ];

@@ -59,6 +59,25 @@ class WebhookController extends Controller
         return response()->json([]);
     }
 
+    protected function smartReply(
+        string $promt,
+    ) : string
+    {
+        $client = \OpenAI::client(config('bot.openapi_token'));
+        $response = $client->chat()->create([
+                                                'model' => 'gpt-3.5-turbo',
+                                                'messages' => [
+                                                    ['role' => 'user', 'content' => $promt],
+                                                ],
+                                            ]);
+        try {
+            $message = $response->choices[0]->message->content;
+        } catch (\Exception $e) {
+            $message = 'Ась?';
+        }
+        return $message;
+    }
+
     protected function parseBotPattern(): bool
     {
         $phrasesArray = [
@@ -363,6 +382,17 @@ class WebhookController extends Controller
                                             $text,
                                             false
                                         ),
+                                       $this->message
+                                   ));
+        }
+        if ( $this->user?->telegram_id == config('bot.owner_id') &&
+            str_contains(
+            $text,
+            'свет мой онотоль скажи да всю правду доложи'
+        )) {
+            $text = str_replace('свет мой онотоль скажи да всю правду доложи','',$text);
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                        $this->smartReply($text),
                                        $this->message
                                    ));
         }
