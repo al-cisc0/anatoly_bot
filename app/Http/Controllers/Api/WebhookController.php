@@ -248,6 +248,7 @@ class WebhookController extends Controller
                                 'class' => $reaction->response['class'],
                                 'message' => $response
                             ];
+                            $reaction->save();
                         }
                     } else {
                         $response = $reaction->response['message'];
