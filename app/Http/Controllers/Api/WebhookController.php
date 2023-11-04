@@ -235,7 +235,7 @@ class WebhookController extends Controller
                     $text,
                     $phrase
                 )) {
-                    if ($reaction->is_class_trigger && (!$reaction->is_daily_updated || Carbon::parse($reaction->updated_at)->diffInDays(now()) > 0)) {
+                    if ($reaction->is_class_trigger && (!$reaction->is_daily_updated || Carbon::parse($reaction->updated_at)->diffInDays(now()) > 0 || empty($reaction->response['message']))) {
                         $class = 'App\Responses\\'.$reaction->response['class'];
                         $response = $class::getResponse(
                             $this->user,
