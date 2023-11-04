@@ -29,6 +29,6 @@ class HolidayResponse
         } catch (\Exception $e) {
             $message = 'Ась?';
         }
-        return $message;
+        return 'Предлагаю сегодня отметить ' . $message;
     }
 }
