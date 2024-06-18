@@ -19,6 +19,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Telegram\Bot\Api;
 
 class WebhookController extends Controller
 {
@@ -195,6 +196,10 @@ class WebhookController extends Controller
                         ]
                     );
                 }
+                $this->checkIfReadOnly(
+                    $user,
+                    $newval
+                );
                 $this->sendBotResponse(new SimpleBotMessageNotification(
                                            'Записал твою оценку в личное дело '.$user->name.PHP_EOL.
                                            'Теперь уровень его уважения в этом чате составляет:'.PHP_EOL.PHP_EOL.$newval,
@@ -204,6 +209,32 @@ class WebhookController extends Controller
             }
         }
         return false;
+    }
+
+    protected function checkIfReadOnly(User $user, int $rating)
+    {
+        if ($rating < config('bot.read_only_rating')) {
+            $telegram = new Api(config('services.telegram-bot-api.token'));
+            $permissions = [
+                'can_send_messages' => false,
+                'can_send_media_messages' => false,
+                'can_send_polls' => false,
+                'can_send_other_messages' => false,
+                'can_add_web_page_previews' => false,
+                'can_change_info' => false,
+                'can_invite_users' => false,
+                'can_pin_messages' => false
+            ];
+            $telegram->restrictChatMember([
+                                              'chat_id' => $this->chat->id,
+                                              'user_id' => $user->telegram_id,
+                                              'permissions' => $permissions
+                                          ]);
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                       'Похоже, что '.$user->name.' слишком раздражает участников чата. Он получил ридонли.',
+                                       $this->message
+                                   ));
+        }
     }
 
     protected function parseMessage()
