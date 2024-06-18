@@ -198,7 +198,8 @@ class WebhookController extends Controller
                 }
                 $this->checkIfReadOnly(
                     $user,
-                    $newval
+                    $currentChat,
+                    $newval,
                 );
                 $this->sendBotResponse(new SimpleBotMessageNotification(
                                            'Записал твою оценку в личное дело '.$user->name.PHP_EOL.
@@ -211,9 +212,13 @@ class WebhookController extends Controller
         return false;
     }
 
-    protected function checkIfReadOnly(User $user, int $rating)
+    protected function checkIfReadOnly(
+        User $user,
+        Chat $currentChat,
+        int $rating
+    )
     {
-        if ($rating < config('bot.read_only_rating')) {
+        if ($rating < config('bot.read_only_rating') && !$currentChat->pivot->is_readonly) {
             $telegram = new Api(config('services.telegram-bot-api.token'));
             $permissions = [
                 'can_send_messages' => false,
@@ -234,6 +239,8 @@ class WebhookController extends Controller
                                        'Похоже, что '.$user->name.' слишком раздражает участников чата. Он получил ридонли.',
                                        $this->message
                                    ));
+            $currentChat->pivot->is_readonly = 1;
+            $currentChat->pivot->save();
         }
     }
 
