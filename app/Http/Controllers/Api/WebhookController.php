@@ -226,7 +226,7 @@ class WebhookController extends Controller
                 'can_pin_messages' => false
             ];
             $telegram->restrictChatMember([
-                                              'chat_id' => $this->chat->id,
+                                              'chat_id' => $this->chat->chat_id,
                                               'user_id' => $user->telegram_id,
                                               'permissions' => $permissions
                                           ]);
