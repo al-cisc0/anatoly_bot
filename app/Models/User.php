@@ -64,6 +64,6 @@ class User extends Authenticatable
      */
     public function chats(): BelongsToMany
     {
-        return $this->belongsToMany(Chat::class)->withPivot(['is_admin','rating']);
+        return $this->belongsToMany(Chat::class)->withPivot(['is_admin','rating','is_readonly']);
     }
 }
