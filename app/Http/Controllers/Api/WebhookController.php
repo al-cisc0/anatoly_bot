@@ -395,7 +395,7 @@ class WebhookController extends Controller
                     'chat_id' => $this->message['chat']['id']
                 ],
                 [
-                    'title' => !empty($this->message['chat']['title']) ?: '',
+                    'title' => $this->message['chat']['title'] ?? 'user',
                     'rules' => '',
                 ]
             );
