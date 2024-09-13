@@ -304,7 +304,10 @@ class WebhookController extends Controller
                 return;
             }
         }
-        if (!$messageSent) {
+        if (
+            !$messageSent &&
+            empty($this->message['new_chat_participant'])
+        ) {
             $this->user
                 ->chats()
                 ->updateExistingPivot(
