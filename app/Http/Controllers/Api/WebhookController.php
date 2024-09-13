@@ -250,7 +250,8 @@ class WebhookController extends Controller
         $telegram = new Api(config('services.telegram-bot-api.token'));
         $telegram->banChatMember([
                                      'chat_id' => $message['chat']['id'],
-                                     'user_id' => $message['from']['id']
+                                     'user_id' => $message['from']['id'],
+                                     'revoke_messages' => true
                                  ]);
         $telegram->deleteMessage([
                                     'chat_id' => $message['chat']['id'],
