@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Actions\AISpamDetector;
 use App\CrawlerExtracts\BearExtract;
 use App\CrawlerExtracts\BooksExtract;
 use App\CrawlerExtracts\ChapayExtract;
@@ -244,6 +245,19 @@ class WebhookController extends Controller
         }
     }
 
+    protected function banTelegramUser(array $message)
+    {
+        $telegram = new Api(config('services.telegram-bot-api.token'));
+        $telegram->banChatMember([
+                                     'chat_id' => $message['chat']['id'],
+                                     'user_id' => $message['from']['id']
+                                 ]);
+        $telegram->deleteMessage([
+                                    'chat_id' => $message['chat']['id'],
+                                    'message_id' => $message['message_id']
+                                 ]);
+    }
+
     protected function parseMessage()
     {
         if (Carbon::parse($this->user->created_at)->diffInMinutes(now()) < 5) {
@@ -255,6 +269,46 @@ class WebhookController extends Controller
             return;
         }
         $text = mb_strtolower($this->message['text'] ?? '');
+
+        $messageSent = $this->user
+            ->chats()
+            ->where('id',$this->chat->id)
+            ->first()
+            ?->pivot
+            ->is_message_sent;
+
+        if (
+            $this->chat->is_spam_detection_enabled &&
+            !$messageSent
+        ) {
+            $spamRating = AISpamDetector::detectSpam($text);
+            if ($spamRating > $this->chat->spam_rating_limit) {
+                $this->sendBotResponse(new SimpleBotMessageNotification(
+                                           $this->user->name.'! Похоже, что ваше сообщение содержит спам. Ваш рейтинг спама: '.$spamRating,
+                                           $this->message
+                                       ));
+                $this->banTelegramUser($this->message);
+                $this->user
+                    ->chats()
+                    ->updateExistingPivot(
+                        $this->chat->id,
+                        [
+                            'is_banned' => 1
+                        ]
+                    );
+                return;
+            }
+        }
+        if (!$messageSent) {
+            $this->user
+                ->chats()
+                ->updateExistingPivot(
+                    $this->chat->id,
+                    [
+                        'is_message_sent' => 1
+                    ]
+                );
+        }
         $reactions = Reaction::whereNull('chat_id')
                               ->Orwhere('chat_id',$this->chat->id)
                               ->get();

@@ -13,5 +13,7 @@ class Chat extends Model
         'chat_id',
         'title',
         'rules',
+        'spam_rating_limit',
+        'is_spam_detection_enabled',
     ];
 }

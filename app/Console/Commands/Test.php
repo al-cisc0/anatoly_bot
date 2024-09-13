@@ -29,7 +29,7 @@ class Test extends Command
     {
         $client = \OpenAI::client(config('bot.openapi_token'));
         $response = $client->chat()->create([
-                                                'model' => 'gpt-4',
+                                                'model' => 'gpt-4o',
                                                 'messages' => [
                                                     ['role' => 'user', 'content' => $this->option('promt')],
                                                 ],
