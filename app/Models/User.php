@@ -72,6 +72,8 @@ class User extends Authenticatable
                     'rating',
                     'is_readonly',
                     'is_message_sent',
+                    'joined_at',
+                    'is_captcha_passed',
                 ]);
     }
 }
