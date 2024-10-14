@@ -299,6 +299,7 @@ class WebhookController extends Controller
                     ]
                 );
             $this->banTelegramUser($this->message);
+            return;
         } elseif (
             !$captchaPassed &&
             $this->chat->is_captcha_enabled &&
