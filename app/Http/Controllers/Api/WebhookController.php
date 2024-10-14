@@ -272,6 +272,8 @@ class WebhookController extends Controller
             ?->pivot
             ->joined_at;
 
+        $joinedAt = $joinedAt ? Carbon::parse($joinedAt) : null;
+
         $captchaPassed = $this->user
             ->chats()
             ->where('id',$this->chat->id)
