@@ -39,11 +39,11 @@ class SimpleBotMessageNotification extends Notification
     public function toTelegram($notifiable)
     {
         $notification = CustomTelegramMessage::create(
-            $this->content . "\n\n" . '[Поддержать Толяна](https:\/\/t.me\/wise_anatoly_support)',
+            $this->content . "\n\n" . '<a href="https:\/\/t.me\/wise_anatoly_support">Поддержать Толяна</a>',
             $this->messageArray['message_id']
         )->to($notifiable->chat_id)
         ->options([
-                      'parse_mode' => 'MarkdownV2', // Setting parse mode to MarkdownV2
+                      'parse_mode' => 'HTML', // Setting parse mode to HTML
                       'disable_web_page_preview' => true // Disabling link preview
                   ]);
         return $notification;
