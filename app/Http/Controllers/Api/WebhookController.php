@@ -281,7 +281,7 @@ class WebhookController extends Controller
 
         if (
             !$captchaPassed &&
-            $this->chat->is_captha_enabled &&
+            $this->chat->is_captcha_enabled &&
             $this->chat->captcha_question &&
             $this->chat->captcha_answer &&
             $joinedAt &&
@@ -291,7 +291,7 @@ class WebhookController extends Controller
             $this->banTelegramUser($this->message);
         } elseif (
             !$captchaPassed &&
-            $this->chat->is_captha_enabled &&
+            $this->chat->is_captcha_enabled &&
             $this->chat->captcha_question &&
             $this->chat->captcha_answer &&
             $joinedAt &&
@@ -435,7 +435,7 @@ class WebhookController extends Controller
                 $this->message
                                    ));
             if (
-                $this->chat->is_captha_enabled &&
+                $this->chat->is_captcha_enabled &&
                 $this->chat->captcha_question &&
                 $this->chat->captcha_answer
             ) {
