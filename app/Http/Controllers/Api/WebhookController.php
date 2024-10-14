@@ -319,6 +319,7 @@ class WebhookController extends Controller
                                        'Поздравляю! Ты успешно прошел капчу. Теперь я тебя не обижу.',
                                        $this->message
                                    ));
+            return;
         }
 
 
