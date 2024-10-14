@@ -434,7 +434,11 @@ class WebhookController extends Controller
                 'Приветствую тебя, путник. Присаживайся, отдохни, выпей чаю и '.$text,
                 $this->message
                                    ));
-            if ($this->chat?->captchaQuestion) {
+            if (
+                $this->chat->is_captha_enabled &&
+                $this->chat->captcha_question &&
+                $this->chat->captcha_answer
+            ) {
                 $this->processCaptcha();
             }
 
