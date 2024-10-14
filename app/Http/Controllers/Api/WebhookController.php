@@ -319,6 +319,11 @@ class WebhookController extends Controller
                                        'Поздравляю! Ты успешно прошел капчу. Теперь я тебя не обижу.',
                                        $this->message
                                    ));
+            $telegram = new Api(config('services.telegram-bot-api.token'));
+            $telegram->deleteMessage([
+                                         'chat_id'    => $this->chat->id,
+                                         'message_id' => $this->message['message_id']
+                                     ]);
             return;
         }
 
