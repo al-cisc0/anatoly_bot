@@ -448,7 +448,7 @@ class WebhookController extends Controller
     protected function processCaptcha()
     {
         $this->sendBotResponse(new SimpleBotMessageNotification(
-            $this->chat->captchaQuestion . ' На ответ у тебя есть 5 минут. Время пошло.',
+            $this->chat->captcha_question . ' На ответ у тебя есть 5 минут. Время пошло.',
             $this->message
         ));
     }
