@@ -15,5 +15,8 @@ class Chat extends Model
         'rules',
         'spam_rating_limit',
         'is_spam_detection_enabled',
+        'is_captcha_enabled',
+        'captcha_question',
+        'captcha_answer',
     ];
 }

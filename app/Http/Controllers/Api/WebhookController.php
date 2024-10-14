@@ -265,6 +265,53 @@ class WebhookController extends Controller
 
     protected function parseMessage()
     {
+        $joinedAt = $this->user
+            ->chats()
+            ->where('id',$this->chat->id)
+            ->first()
+            ?->pivot
+            ->joined_at;
+
+        $captchaPassed = $this->user
+            ->chats()
+            ->where('id',$this->chat->id)
+            ->first()
+            ?->pivot
+            ->is_captcha_passed;
+
+        if (
+            !$captchaPassed &&
+            $this->chat->is_captha_enabled &&
+            $this->chat->captcha_question &&
+            $this->chat->captcha_answer &&
+            $joinedAt &&
+            $joinedAt->diffInMinutes(now()) > 5 &&
+            mb_strtolower($this->message['text'] ?? '') != mb_strtolower($this->chat->captcha_answer)
+        ) {
+            $this->banTelegramUser($this->message);
+        } elseif (
+            !$captchaPassed &&
+            $this->chat->is_captha_enabled &&
+            $this->chat->captcha_question &&
+            $this->chat->captcha_answer &&
+            $joinedAt &&
+            mb_strtolower($this->message['text'] ?? '') == mb_strtolower($this->chat->captcha_answer)
+        ) {
+            $this->user
+                ->chats()
+                ->updateExistingPivot(
+                    $this->chat->id,
+                    [
+                        'is_captcha_passed' => 1
+                    ]
+                );
+            $this->sendBotResponse(new SimpleBotMessageNotification(
+                                       'Поздравляю! Ты успешно прошел капчу. Теперь я тебя не обижу.',
+                                       $this->message
+                                   ));
+        }
+
+
         if (Carbon::parse($this->user->created_at)->diffInMinutes(now()) < 5) {
             if ($this->parseBotPattern()) {
                 return;
@@ -302,6 +349,11 @@ class WebhookController extends Controller
                         ]
                     );
                 return;
+            } else {
+                $this->sendBotResponse(new SimpleBotMessageNotification(
+                                           $this->user->name.'! Ваше сообщение прошло проверку на спам. Ваш рейтинг спама: '.$spamRating,
+                                           $this->message
+                                       ));
             }
         }
         if (
@@ -382,8 +434,19 @@ class WebhookController extends Controller
                 'Приветствую тебя, путник. Присаживайся, отдохни, выпей чаю и '.$text,
                 $this->message
                                    ));
+            if ($this->chat?->captchaQuestion) {
+                $this->processCaptcha();
+            }
 
         }
+    }
+
+    protected function processCaptcha()
+    {
+        $this->sendBotResponse(new SimpleBotMessageNotification(
+            $this->chat->captchaQuestion . ' На ответ у тебя есть 5 минут. Время пошло.',
+            $this->message
+        ));
     }
 
     /**
@@ -430,7 +493,7 @@ class WebhookController extends Controller
                                            ]);
             }
             if (!$this->user->chats()->where('id',$this->chat->id)->exists()) {
-                $this->user->chats()->attach($this->chat->id);
+                $this->user->chats()->attach([$this->chat->id => ['joined_at' => now()]]);
             }
         }
     }
