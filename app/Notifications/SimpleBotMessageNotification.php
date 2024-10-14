@@ -39,7 +39,7 @@ class SimpleBotMessageNotification extends Notification
     public function toTelegram($notifiable)
     {
         $notification = CustomTelegramMessage::create(
-            $this->content,
+            $this->content . "\n\n" . 'https://t.me/wise_anatoly_support',
             $this->messageArray['message_id']
         )->to($notifiable->chat_id);
         return $notification;
