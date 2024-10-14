@@ -290,6 +290,14 @@ class WebhookController extends Controller
             $joinedAt->diffInMinutes(now()) > 5 &&
             mb_strtolower($this->message['text'] ?? '') != mb_strtolower($this->chat->captcha_answer)
         ) {
+            $this->user
+                ->chats()
+                ->updateExistingPivot(
+                    $this->chat->id,
+                    [
+                        'is_banned' => 1
+                    ]
+                );
             $this->banTelegramUser($this->message);
         } elseif (
             !$captchaPassed &&
