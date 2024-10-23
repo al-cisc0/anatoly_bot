@@ -18,5 +18,6 @@ class Chat extends Model
         'is_captcha_enabled',
         'captcha_question',
         'captcha_answer',
+        'is_join_request_approve_enabled',
     ];
 }

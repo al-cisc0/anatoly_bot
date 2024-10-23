@@ -216,7 +216,7 @@ class WebhookController extends Controller
     protected function checkIfReadOnly(
         User $user,
         Chat $currentChat,
-        int $rating
+        int $rating,
     )
     {
         if ($rating < config('bot.read_only_rating') && !$currentChat->pivot->is_readonly) {
@@ -242,6 +242,22 @@ class WebhookController extends Controller
                                    ));
             $currentChat->pivot->is_readonly = 1;
             $currentChat->pivot->save();
+        }
+    }
+
+    protected function approveChatJoinRequest(
+        int $chatId,
+        int $userId,
+    ): void
+    {
+        try {
+            $telegram = new Api(config('services.telegram-bot-api.token'));
+            $telegram->approveChatJoinRequest([
+                                                  'chat_id' => $chatId,
+                                                  'user_id' => $userId,
+                                              ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage().PHP_EOL.$e->getTraceAsString());
         }
     }
 
@@ -348,7 +364,8 @@ class WebhookController extends Controller
 
         if (
             $this->chat->is_spam_detection_enabled &&
-            !$messageSent
+            !$messageSent &&
+            !empty($this->message['text'])
         ) {
             $spamRating = AISpamDetector::detectSpam($text);
             if ($spamRating > $this->chat->spam_rating_limit) {
@@ -385,6 +402,16 @@ class WebhookController extends Controller
                         'is_message_sent' => 1
                     ]
                 );
+        }
+        if (
+            !empty($this->message['chat_join_request']) &&
+            $this->chat->is_join_request_approve_enabled
+        ) {
+            $chatJoinRequest = $this->message['chat_join_request'];
+
+            $chatId = $chatJoinRequest['chat']['id'];
+            $userId = $chatJoinRequest['from']['id'];
+            $this->approveChatJoinRequest($chatId, $userId);
         }
         $reactions = Reaction::whereNull('chat_id')
                               ->Orwhere('chat_id',$this->chat->id)
