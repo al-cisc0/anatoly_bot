@@ -414,7 +414,7 @@ class WebhookController extends Controller
             $this->approveChatJoinRequest($chatId, $userId);
         }
         $reactions = Reaction::whereNull('chat_id')
-                              ->Orwhere('chat_id',$this->chat->id)
+                              ->orWhere('chat_id', $this->chat->id)
                               ->get();
         foreach ($reactions as $reaction) {
             $keyPhrase = $reaction->key_phrase;
