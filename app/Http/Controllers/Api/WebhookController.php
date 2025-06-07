@@ -58,67 +58,6 @@ class WebhookController extends Controller
         return response()->json([]);
     }
 
-    protected function parseBotPattern(): bool
-    {
-        return ParseBotPatternAction::execute($this->message, $this->user);
-    }
-
-    protected function parseRating():bool
-    {
-        return ParseRatingAction::execute($this->message, $this->user, $this->chat);
-    }
-
-    protected function checkIfReadOnly(
-        User $user,
-        Chat $currentChat,
-        int $rating,
-    )
-    {
-        CheckIfReadOnlyAction::execute($user, $currentChat, $rating, $this->chat, $this->message);
-    }
-
-    protected function approveChatJoinRequest(
-        int $chatId,
-        int $userId,
-    ): void
-    {
-        ApproveChatJoinRequestAction::execute($chatId, $userId);
-    }
-
-    protected function banTelegramUser(array $message)
-    {
-        BanTelegramUserAction::execute($message);
-    }
-
-    protected function parseMessage()
-    {
-        ParseMessageAction::execute($this->message, $this->user, $this->chat);
-    }
-
-    protected function processCaptcha()
-    {
-        ProcessCaptchaAction::execute($this->chat, $this->user, $this->message);
-    }
-
-    /**
-     * Set current user who interacts with bot
-     *
-     */
-    protected function setUser()
-    {
-        [$this->user, $this->chat] = SetUserAction::execute($this->message);
-    }
-
-    /**
-     * Send response from bot to chat where command was executed
-     *
-     * @param Notification $notification
-     */
-    protected function sendBotResponse(Notification $notification)
-    {
-        SendBotResponseAction::execute($this->user, $this->message, $notification);
-    }
-
     public function test(Request $request)
     {
         print_r($request->all(),1);
