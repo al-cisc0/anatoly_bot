@@ -5,7 +5,8 @@ namespace App\Actions;
 class AISpamDetector
 {
     public static function detectSpam(
-        string $message
+        string $message,
+        $client = null
     ): int
     {
         $text = 'Проанализируй это сообщение на предмет спама. Дай свою оценку в процентах от 0 до 100. '.
@@ -18,7 +19,9 @@ class AISpamDetector
             ' Кроме того проверь не является ли сообщение пользователя известным мемом.'.
             'Напиши только цифру в ответе. '.
             'Сообщение пользователя: ' . $message;
-        $client = \OpenAI::client(config('bot.openapi_token'));
+        if (!$client) {
+            $client = \OpenAI::client(config('bot.openapi_token'));
+        }
         $response = $client->chat()->create([
                                                 'model' => 'gpt-4o',
                                                 'messages' => [

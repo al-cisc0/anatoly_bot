@@ -16,8 +16,6 @@ class AISpamDetectorTest extends TestCase
 
     public function test_detect_spam_returns_integer()
     {
-        $this->markTestSkipped('Unable to mock OpenAI static client in this environment.');
-
         $chatMock = new class {
             public function create(array $params)
             {
@@ -34,10 +32,8 @@ class AISpamDetectorTest extends TestCase
             public function chat() { return $this->chat; }
         };
 
-        Mockery::mock('alias:OpenAI')
-            ->shouldReceive('client')
-            ->andReturn($clientMock);
+        $this->assertSame(5, AISpamDetector::detectSpam('test', $clientMock));
 
-        $this->assertSame(5, AISpamDetector::detectSpam('test'));
+        $this->addToAssertionCount(1);
     }
 }
