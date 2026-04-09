@@ -51,10 +51,11 @@ class WebhookController extends Controller
             return abort(403);
         }
         $this->message = $request->get('message');
-        [$this->user, $this->chat] = SetUserAction::execute($this->message);
-        if ($this->message) {
-            ParseMessageAction::execute($this->message, $this->user, $this->chat);
+        if (!$this->message) {
+            return response()->json([]);
         }
+        [$this->user, $this->chat] = SetUserAction::execute($this->message);
+        ParseMessageAction::execute($this->message, $this->user, $this->chat);
         return response()->json([]);
     }
 
