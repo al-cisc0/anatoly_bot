@@ -16,19 +16,40 @@ class HolidayResponse
         array $message,
     ): string
     {
-        $text = 'Придумай забавный праздник который мог бы отмечаться сегодня. Он должен быть максимально абсурдным и целевой аудиторией должны быть взрослые люди но ненадо это явно упоминать. Выбери какой-то один. Дай только название и описание без дополнительных слов от себя. Не пиши слово название и слово абсурдный.';
+        $date = now()->translatedFormat('j F Y');
+        $text = "Сегодня {$date}. Вспомни какие реальные необычные или нелепые праздники (в том числе неофициальные) отмечаются в эту дату в мире. Выбери один самый нелепый. Если не знаешь ни одного настоящего — выдумай сам максимально абсурдный праздник для этой даты. Целевая аудитория — взрослые люди, но не упоминай это. Без форматирования и лишних слов. Ответ строго в формате:\nНАЗВАНИЕ: название праздника\nОПИСАНИЕ: смешное описание на 3-4 предложения с юмором и иронией\nРЕАЛЬНЫЙ: да/нет";
         $client = \OpenAI::client(config('bot.openapi_token'));
         $response = $client->chat()->create([
-                                                'model' => 'gpt-4',
+                                                'model' => config('bot.openai_model'),
                                                 'messages' => [
                                                     ['role' => 'user', 'content' => $text],
                                                 ],
                                             ]);
         try {
-            $message = $response->choices[0]->message->content;
+            $content = $response->choices[0]->message->content;
         } catch (\Exception $e) {
-            $message = 'Ась?';
+            return 'Ась?';
         }
-        return 'Предлагаю сегодня отметить ' . $message;
+
+        preg_match('/НАЗВАНИЕ:\s*(.+)/u', $content, $nameMatch);
+        preg_match('/ОПИСАНИЕ:\s*(.+)/u', $content, $descMatch);
+        preg_match('/РЕАЛЬНЫЙ:\s*(.+)/u', $content, $realMatch);
+
+        $name = trim($nameMatch[1] ?? '');
+        $description = trim($descMatch[1] ?? '');
+        $isReal = mb_stripos($realMatch[1] ?? '', 'да') !== false;
+
+        if (!$name || !$description) {
+            return 'Предлагаю сегодня отметить ' . $content;
+        }
+
+        $result = "Предлагаю сегодня отметить {$name}\n\n{$description}";
+
+        if ($isReal) {
+            $query = urlencode($name);
+            $result .= "\n\nНе веришь? Проверь: https://www.google.com/search?q={$query}";
+        }
+
+        return $result;
     }
 }

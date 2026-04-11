@@ -20,7 +20,7 @@ class ChatGPTResponse
         $text = str_replace($reaction->key_phrase,'',$text);
         $client = \OpenAI::client(config('bot.openapi_token'));
         $response = $client->chat()->create([
-                                                'model' => 'gpt-4',
+                                                'model' => config('bot.openai_model'),
                                                 'messages' => [
                                                     ['role' => 'user', 'content' => $text],
                                                 ],

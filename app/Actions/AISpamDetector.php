@@ -23,7 +23,7 @@ class AISpamDetector
             $client = \OpenAI::client(config('bot.openapi_token'));
         }
         $response = $client->chat()->create([
-                                                'model' => 'gpt-4o',
+                                                'model' => config('bot.openai_model'),
                                                 'messages' => [
                                                     ['role' => 'user', 'content' => $text],
                                                 ],
