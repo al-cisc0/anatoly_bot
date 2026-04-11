@@ -12,6 +12,7 @@ return [
     'free_access' => env('TELEGRAM_BOT_FREE_ACCESS',1),
     'donation_address' => env('AUTHOR_DONATION_ADDRESS',''),
     'openapi_token' => env('OPENAPI_TOKEN',''),
+    'bot_telegram_id' => (int) explode(':', env('TELEGRAM_BOT_TOKEN', ''), 2)[0],
     'openai_model' => env('OPENAI_MODEL', 'gpt-5.4'),
     'read_only_rating' => env('READ_ONLY_RATING',-10),
 ];

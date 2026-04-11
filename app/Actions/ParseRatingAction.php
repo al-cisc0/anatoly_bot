@@ -25,6 +25,35 @@ class ParseRatingAction
                 return true;
             }
             $userTgId = $message['reply_to_message']['from']['id'];
+            if ($userTgId == config('bot.bot_telegram_id')) {
+                if ($request == '-') {
+                    $currentChat = $user->chats()->where('id', $chat->id)->first();
+                    if ($currentChat) {
+                        $newval = $currentChat->pivot->rating - 1;
+                        $currentChat->pivot->rating = $newval;
+                        $currentChat->pivot->save();
+                        CheckIfReadOnlyAction::execute($user, $currentChat, $newval, $chat, $message);
+                    }
+                    SendBotResponseAction::execute(
+                        $user,
+                        $message,
+                        new SimpleBotMessageNotification(
+                            'Ставишь минус тому, кто ведёт твоё личное дело? Смелый ход. Записал минус тебе.' . PHP_EOL . 'Твой рейтинг теперь: ' . ($newval ?? $selfRating),
+                            $message
+                        )
+                    );
+                } else {
+                    SendBotResponseAction::execute(
+                        $user,
+                        $message,
+                        new SimpleBotMessageNotification(
+                            'Спасибо, приятно! Но я робот, мне не положено краснеть.',
+                            $message
+                        )
+                    );
+                }
+                return true;
+            }
             if ($targetUser = User::OfTelegramId($userTgId)->first()) {
                 if ($targetUser->id == $user->id) {
                     if ($request == '+') {
@@ -57,7 +86,7 @@ class ParseRatingAction
                     $newval = $request == '+' ? 1 : -1;
                     $targetUser->chats()->attach([
                         $chat->id => [
-                            'rating' => -1
+                            'rating' => $newval
                         ]
                     ]);
                 }
