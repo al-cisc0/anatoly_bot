@@ -19,14 +19,17 @@ class HolidayResponse
         $date = now()->translatedFormat('j F Y');
         $text = "Сегодня {$date}. Вспомни какие реальные необычные или нелепые праздники (в том числе неофициальные) отмечаются в эту дату в мире. Выбери один самый нелепый. Если не знаешь ни одного настоящего — выдумай сам максимально абсурдный праздник для этой даты. Целевая аудитория — взрослые люди, но не упоминай это. Без форматирования и лишних слов. Ответ строго в формате:\nНАЗВАНИЕ: название праздника\nОПИСАНИЕ: смешное описание на 3-4 предложения с юмором и иронией\nРЕАЛЬНЫЙ: да/нет";
         $client = \OpenAI::client(config('bot.openapi_token'));
-        $response = $client->chat()->create([
-                                                'model' => config('bot.openai_model'),
-                                                'messages' => [
-                                                    ['role' => 'user', 'content' => $text],
-                                                ],
-                                            ]);
         try {
+            $response = $client->chat()->create([
+                                                    'model' => config('bot.openai_model'),
+                                                    'messages' => [
+                                                        ['role' => 'user', 'content' => $text],
+                                                    ],
+                                                ]);
             $content = $response->choices[0]->message->content;
+        } catch (\OpenAI\Exceptions\ErrorException $e) {
+            \App\Actions\OpenAIErrorHandler::handle($e);
+            return 'Ась?';
         } catch (\Exception $e) {
             return 'Ась?';
         }

@@ -22,16 +22,19 @@ class AISpamDetector
         if (!$client) {
             $client = \OpenAI::client(config('bot.openapi_token'));
         }
-        $response = $client->chat()->create([
-                                                'model' => config('bot.openai_model'),
-                                                'messages' => [
-                                                    ['role' => 'user', 'content' => $text],
-                                                ],
-                                            ]);
         try {
+            $response = $client->chat()->create([
+                                                    'model' => config('bot.openai_model'),
+                                                    'messages' => [
+                                                        ['role' => 'user', 'content' => $text],
+                                                    ],
+                                                ]);
             $rating = $response->choices[0]->message->content;
+        } catch (\OpenAI\Exceptions\ErrorException $e) {
+            OpenAIErrorHandler::handle($e);
+            return 0;
         } catch (\Exception $e) {
-            $rating = 0;
+            return 0;
         }
         return (int) $rating;
     }
